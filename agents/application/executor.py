@@ -2,19 +2,20 @@ import os
 import json
 import ast
 import re
-from typing import List, Dict, Any
-
+import logging
 import math
+from typing import List, Dict, Any
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-
 from agents.polymarket.gamma import GammaMarketClient as Gamma
 from agents.connectors.chroma import PolymarketRAG as Chroma
 from agents.utils.objects import SimpleEvent, SimpleMarket
 from agents.application.prompts import Prompter
 from agents.polymarket.polymarket import Polymarket
+
+logger = logging.getLogger(__name__)
 
 def retain_keys(data, keys_to_retain):
     if isinstance(data, dict):
@@ -29,14 +30,21 @@ def retain_keys(data, keys_to_retain):
         return data
 
 class Executor:
-    def __init__(self, default_model='gpt-3.5-turbo-16k') -> None:
+    def __init__(self, default_model: str = 'gpt-4o-mini') -> None:
         load_dotenv()
-        max_token_model = {'gpt-3.5-turbo-16k':15000, 'gpt-4-1106-preview':95000}
-        self.token_limit = max_token_model.get(default_model)
+        max_token_model: Dict[str, int] = {
+            'gpt-3.5-turbo-16k': 15000,
+            'gpt-4-1106-preview': 95000,
+            'gpt-4o-mini': 128000,
+            'gpt-4o': 128000,
+        }
+        self.token_limit = max_token_model.get(default_model, 128000)
         self.prompter = Prompter()
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        if not self.openai_api_key:
+            logger.warning("OPENAI_API_KEY not found in environment")
         self.llm = ChatOpenAI(
-            model=default_model, #gpt-3.5-turbo"
+            model=default_model,
             temperature=0,
         )
         self.gamma = Gamma()
@@ -97,11 +105,13 @@ class Executor:
             return self.process_data_chunk(data1, data2, user_input)
         else:
             # If exceeding limit, process in chunks
-            chunk_size = len(combined_data) // ((total_tokens // token_limit) + 1)
-            print(f'total tokens {total_tokens} exceeding llm capacity, now will split and answer')
-            group_size = (total_tokens // token_limit) + 1 # 3 is safe factor
-            keys_no_meaning = ['image','pagerDutyNotificationEnabled','resolvedBy','endDate','clobTokenIds','negRiskMarketID','conditionId','updatedAt','startDate']
-            useful_keys = ['id','questionID','description','liquidity','clobTokenIds','outcomes','outcomePrices','volume','startDate','endDate','question','questionID','events']
+            logger.info(f'Total tokens {total_tokens} exceeding LLM capacity, splitting into chunks')
+            group_size = (total_tokens // token_limit) + 1
+            useful_keys = [
+                'id', 'questionID', 'description', 'liquidity', 'clobTokenIds',
+                'outcomes', 'outcomePrices', 'volume', 'startDate', 'endDate',
+                'question', 'events'
+            ]
             data1 = retain_keys(data1, useful_keys)
             cut_1 = self.divide_list(data1, group_size)
             cut_2 = self.divide_list(data2, group_size)
@@ -112,15 +122,10 @@ class Executor:
             for cut_data in cut_data_12:
                 sub_data1 = cut_data[0]
                 sub_data2 = cut_data[1]
-                sub_tokens = self.estimate_tokens(str(self.prompter.prompts_polymarket(data1=sub_data1, data2=sub_data2)))
-
                 result = self.process_data_chunk(sub_data1, sub_data2, user_input)
                 results.append(result)
             
             combined_result = " ".join(results)
-            
-        
-            
             return combined_result
     def filter_events(self, events: "list[SimpleEvent]") -> str:
         prompt = self.prompter.filter_events(events)
@@ -129,9 +134,7 @@ class Executor:
 
     def filter_events_with_rag(self, events: "list[SimpleEvent]") -> str:
         prompt = self.prompter.filter_events()
-        print()
-        print("... prompting ... ", prompt)
-        print()
+        logger.debug(f"Filtering events with RAG, prompt: {prompt[:100]}...")
         return self.chroma.events(events, prompt)
 
     def map_filtered_events_to_markets(
@@ -149,9 +152,7 @@ class Executor:
 
     def filter_markets(self, markets) -> "list[tuple]":
         prompt = self.prompter.filter_markets()
-        print()
-        print("... prompting ... ", prompt)
-        print()
+        logger.debug(f"Filtering markets, prompt: {prompt[:100]}...")
         return self.chroma.markets(markets, prompt)
 
     def source_best_trade(self, market_object) -> str:
@@ -163,22 +164,16 @@ class Executor:
         description = market_document["page_content"]
 
         prompt = self.prompter.superforecaster(question, description, outcomes)
-        print()
-        print("... prompting ... ", prompt)
-        print()
+        logger.debug("Getting superforecast prediction")
         result = self.llm.invoke(prompt)
         content = result.content
+        logger.debug(f"Superforecast result: {content[:200]}...")
 
-        print("result: ", content)
-        print()
         prompt = self.prompter.one_best_trade(content, outcomes, outcome_prices)
-        print("... prompting ... ", prompt)
-        print()
+        logger.debug("Determining best trade")
         result = self.llm.invoke(prompt)
         content = result.content
-
-        print("result: ", content)
-        print()
+        logger.debug(f"Best trade result: {content[:200]}...")
         return content
 
     def format_trade_prompt_for_execution(self, best_trade: str) -> float:
@@ -190,9 +185,7 @@ class Executor:
 
     def source_best_market_to_create(self, filtered_markets) -> str:
         prompt = self.prompter.create_new_market(filtered_markets)
-        print()
-        print("... prompting ... ", prompt)
-        print()
+        logger.debug("Creating new market idea")
         result = self.llm.invoke(prompt)
         content = result.content
         return content

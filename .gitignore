@@ -1,29 +1,76 @@
-.venv
-.env
-.idea
-.ipynb_checkpoints
-.mypy_cache
-.vscode
-__pycache__
-.pytest_cache
-htmlcov
-dist
-site
-.coverage
-coverage.xml
-.netlify
-test.db
-log.txt
-Pipfile.lock
-env3.*
-env
-docs_build
-site_build
-venv
-docs.zip
-archive.zip
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 *~
-.*.sw?
-.cache
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Local RAG databases
+local_db/
+local_db_events/
+local_db_markets/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# OS
 .DS_Store
-local_db*
+Thumbs.db
+
+# Project specific
+*.json.bak
+*.csv

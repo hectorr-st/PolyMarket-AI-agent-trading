@@ -9,7 +9,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/polymarket/agents">
+  <a href="https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git">
     <img src="docs/images/cli.png" alt="Logo" width="466" height="262">
   </a>
 
@@ -18,14 +18,14 @@
   <p align="center">
     Trade autonomously on Polymarket using AI Agents
     <br />
-    <a href="https://github.com/polymarket/agents"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/polymarket/agents">View Demo</a>
+    <a href="https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git">View Demo</a>
     ·
-    <a href="https://github.com/polymarket/agents/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/polymarket/agents/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -39,90 +39,188 @@ This code is free and publicly available under MIT License open source license (
 
 ## Features
 
-- Integration with Polymarket API
-- AI agent utilities for prediction markets
-- Local and remote RAG (Retrieval-Augmented Generation) support
-- Data sourcing from betting services, news providers, and web search
-- Comphrehensive LLM tools for prompt engineering
+- **AI-Powered Trading**: Autonomous trading agents using state-of-the-art LLMs
+- **Polymarket Integration**: Full API integration for markets, events, and trading
+- **RAG Support**: Local and remote RAG (Retrieval-Augmented Generation) for market analysis
+- **Data Sources**: Integration with news providers, web search, and betting services
+- **Superforecasting**: Advanced prediction capabilities using superforecaster methodologies
+- **Modern Stack**: Built with Python 3.12+, LangChain, FastAPI, and modern tooling
+- **Docker Ready**: Containerized deployment for easy setup
 
 # Getting started
 
-This repo is inteded for use with Python 3.9
+This project requires **Python 3.12+**.
 
-1. Clone the repository
+## Prerequisites
 
+- Python 3.12 or higher
+- pip (Python package manager)
+- (Optional) Docker for containerized deployment
+
+## Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/BlackSky-Jose/PolyMarket-AI-agent-trading.git
+   cd poly-ai-trading-agent
    ```
-   git clone https://github.com/{username}/polymarket-agents.git
-   cd polymarket-agents
+
+2. **Create a virtual environment**
+
+   Using `venv` (recommended):
+   
+   ```bash
+   python -m venv .venv
    ```
 
-2. Create the virtual environment
-
+   Or using `uv` (faster):
+   
+   ```bash
+   uv venv
    ```
-   virtualenv --python=python3.9 .venv
+
+3. **Activate the virtual environment**
+
+   - On Windows (PowerShell):
+   
+   ```powershell
+   .venv\Scripts\Activate.ps1
    ```
-
-3. Activate the virtual environment
-
-   - On Windows:
-
-   ```
-   .venv\Scripts\activate
+   
+   - On Windows (CMD):
+   
+   ```cmd
+   .venv\Scripts\activate.bat
    ```
 
    - On macOS and Linux:
-
-   ```
+   
+   ```bash
    source .venv/bin/activate
    ```
 
-4. Install the required dependencies:
+4. **Install the project**
 
+   Using pip:
+   
+   ```bash
+   pip install -e .
    ```
-   pip install -r requirements.txt
-   ```
-
-5. Set up your environment variables:
-
-   - Create a `.env` file in the project root directory
-
-   ```
-   cp .env.example .env
-   ```
-
-   - Add the following environment variables:
-
-   ```
-   POLYGON_WALLET_PRIVATE_KEY=""
-   OPENAI_API_KEY=""
+   
+   Or with development dependencies:
+   
+   ```bash
+   pip install -e ".[dev]"
    ```
 
-6. Load your wallet with USDC.
-
-7. Try the command line interface...
-
-   ```
-   python scripts/python/cli.py
+   Using uv (faster):
+   
+   ```bash
+   uv pip install -e ".[dev]"
    ```
 
-   Or just go trade! 
+5. **Set up environment variables**
 
+   Create a `.env` file in the project root:
+   
+   ```bash
+   # Copy example if available, or create new
+   touch .env
    ```
-   python agents/application/trade.py
+   
+   Add the following environment variables:
+   
+   ```env
+   POLYGON_WALLET_PRIVATE_KEY="your_private_key_here"
+   OPENAI_API_KEY="your_openai_api_key_here"
+   NEWSAPI_API_KEY="your_newsapi_key_here"  # Optional
+   TAVILY_API_KEY="your_tavily_key_here"     # Optional
    ```
 
-8. Note: If running the command outside of docker, please set the following env var:
+6. **Load your wallet with USDC** (if trading)
 
-   ```
-   export PYTHONPATH="."
-   ```
+## Usage
 
-   If running with docker is preferred, we provide the following scripts:
+### Command Line Interface
 
-   ```
-   ./scripts/bash/build-docker.sh
-   ./scripts/bash/run-docker-dev.sh
-   ```
+The CLI provides various commands for interacting with Polymarket:
+
+```bash
+# List available commands
+python -m scripts.python.cli --help
+
+# Get all markets
+python -m scripts.python.cli get-all-markets --limit 10 --sort-by spread
+
+# Get all events
+python -m scripts.python.cli get-all-events --limit 5
+
+# Query LLM
+python -m scripts.python.cli ask-llm "What are the best markets to trade?"
+
+# Run autonomous trader (⚠️ Review TOS first)
+python -m scripts.python.cli run-autonomous-trader
+```
+
+### Direct Script Execution
+
+You can also run the trading script directly:
+
+```bash
+python -m agents.application.trade
+```
+
+### Docker Deployment
+
+Build and run with Docker:
+
+```bash
+# Build the image
+docker build -t poly-ai-trading-agent .
+
+# Run the container
+docker run --env-file .env poly-ai-trading-agent
+```
+
+Or use the provided scripts:
+
+```bash
+./scripts/bash/build-docker.sh
+./scripts/bash/run-docker-dev.sh
+```
+
+## Development
+
+### Code Quality
+
+This project uses modern Python tooling:
+
+- **Ruff** - Fast Python linter and formatter
+- **mypy** - Static type checking
+- **pre-commit** - Git hooks for code quality
+
+Set up pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+Run linting and type checking:
+
+```bash
+ruff check .
+ruff format .
+mypy .
+```
+
+### Testing
+
+Run tests:
+
+```bash
+pytest
+```
 
 ## Architecture
 
@@ -171,29 +269,21 @@ If you would like to contribute to this project, please follow these steps:
 3. Make your changes.
 4. Submit a pull request.
 
-Please run pre-commit hooks before making contributions. To initialize them:
+### Code Quality
 
-   ```
-   pre-commit install
-   ```
+Before making contributions, please:
 
-# Related Repos
+1. Install development dependencies: `pip install -e ".[dev]"`
+2. Set up pre-commit hooks: `pre-commit install`
+3. Run linting: `ruff check . && ruff format .`
+4. Run type checking: `mypy .`
 
-- [py-clob-client](https://github.com/Polymarket/py-clob-client): Python client for the Polymarket CLOB
-- [python-order-utils](https://github.com/Polymarket/python-order-utils): Python utilities to generate and sign orders from Polymarket's CLOB
-- [Polymarket CLOB client](https://github.com/Polymarket/clob-client): Typescript client for Polymarket CLOB
-- [Langchain](https://github.com/langchain-ai/langchain): Utility for building context-aware reasoning applications
-- [Chroma](https://docs.trychroma.com/getting-started): Chroma is an AI-native open-source vector database
 
 # Prediction markets reading
 
 - Prediction Markets: Bottlenecks and the Next Major Unlocks, Mikey 0x: https://mirror.xyz/1kx.eth/jnQhA56Kx9p3RODKiGzqzHGGEODpbskivUUNdd7hwh0
 - The promise and challenges of crypto + AI applications, Vitalik Buterin: https://vitalik.eth.limo/general/2024/01/30/cryptoai.html
 - Superforecasting: How to Upgrade Your Company's Judgement, Schoemaker and Tetlock: https://hbr.org/2016/05/superforecasting-how-to-upgrade-your-companys-judgment
-
-# License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/Polymarket/agents/blob/main/LICENSE.md) file for details.
 
 # Contact
 
@@ -206,14 +296,4 @@ Enjoy using the CLI application! If you encounter any issues, feel free to open 
 [Terms of Service](https://polymarket.com/tos) prohibit US persons and persons from certain other jurisdictions from trading on Polymarket (via UI & API and including agents developed by persons in restricted jurisdictions), although data and information is viewable globally.
 
 
-<!-- LINKS -->
-[contributors-shield]: https://img.shields.io/github/contributors/polymarket/agents?style=for-the-badge
-[contributors-url]: https://github.com/polymarket/agents/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/polymarket/agents?style=for-the-badge
-[forks-url]: https://github.com/polymarket/agents/network/members
-[stars-shield]: https://img.shields.io/github/stars/polymarket/agents?style=for-the-badge
-[stars-url]: https://github.com/polymarket/agents/stargazers
-[issues-shield]: https://img.shields.io/github/issues/polymarket/agents?style=for-the-badge
-[issues-url]: https://github.com/polymarket/agents/issues
-[license-shield]: https://img.shields.io/github/license/polymarket/agents?style=for-the-badge
-[license-url]: https://github.com/polymarket/agents/blob/master/LICENSE.md
+
