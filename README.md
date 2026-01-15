@@ -287,7 +287,7 @@ Before making contributions, please:
 
 # Contact
 
-For any questions or inquiries, please contact liam@polymarket.com or reach out at www.greenestreet.xyz
+For any questions or inquiries, please contact dr.smart710@gmail.com
 
 Enjoy using the CLI application! If you encounter any issues, feel free to open an issue on the repository.
 
